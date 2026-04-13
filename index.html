@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SOA Portal Simulator</title>
+
+<style>
+body{
+    margin:0;
+    font-family:Arial;
+    background:#f0f0f0;
+    color:#111;
+}
+
+/* Center login */
+.login-container{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    height:100vh;
+}
+
+input{
+    margin:10px 0;
+    padding:10px;
+    width:220px;
+    border-radius:5px;
+    border:1px solid #ccc;
+}
+
+button{
+    padding:10px 20px;
+    border-radius:25px;
+    border:2px solid #1e293b;
+    background:#1e293b;
+    color:white;
+    cursor:pointer;
+    transition:0.3s;
+}
+button:hover{
+    background:#334155;
+    transform:scale(1.05);
+}
+button:active{
+    transform:scale(0.95);
+}
+
+/* Sidebar */
+.sidebar{
+    width:250px;
+    height:100vh;
+    background:#1e293b;
+    color:white;
+    position:fixed;
+    left:-250px;
+    top:0;
+    transition:0.3s;
+    padding-top:20px;
+}
+.sidebar.active{ left:0; }
+.sidebar h2{ text-align:center; }
+.sidebar ul{ list-style:none; padding:0; }
+.sidebar ul li{
+    padding:15px;
+    cursor:pointer;
+    border-bottom:1px solid rgba(255,255,255,0.1);
+    transition:0.3s;
+}
+.sidebar ul li:hover{ background:#334155; }
+
+/* Main */
+.main{
+    margin-left:0;
+    padding:20px;
+    width:100%;
+    transition:0.3s;
+}
+.main.shift{ margin-left:250px; }
+
+/* Card */
+.card{
+    background:#f1f5f9;
+    padding:20px;
+    border-radius:15px;
+    margin-top:20px;
+    box-shadow:0 5px 15px rgba(0,0,0,0.2);
+    color:#111;
+}
+
+/* Responsive */
+@media(max-width:600px){
+    .main.shift{ margin-left:0; }
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN PAGE -->
+<div class="login-container" id="loginPage">
+    <h2>SOA Portal Login</h2>
+    <input type="password" id="password" placeholder="Enter password">
+    <button onclick="login()">Login</button>
+</div>
+
+<!-- DASHBOARD -->
+<div style="display:none;" id="dashboard">
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <h2>Menu</h2>
+        <ul>
+            <li onclick="showSection('home')">🏠 Home</li>
+            <li onclick="showSection('personal')">👤 Personal Details</li>
+            <li onclick="showSection('result')">📊 Student Result</li>
+            <li onclick="logout()">🚪 Logout</li>
+        </ul>
+    </div>
+
+    <!-- Main -->
+    <div class="main" id="main">
+        <button class="menu-btn" onclick="toggleMenu()">☰</button>
+        <h1 id="welcome"></h1>
+
+        <!-- Sections -->
+        <div id="home" class="card">
+            <h2>Home</h2>
+            <p>This is your personal dashboard 🚀</p>
+        </div>
+
+        <div id="personal" class="card" style="display:none;"></div>
+        <div id="result" class="card" style="display:none;"></div>
+    </div>
+</div>
+
+<script>
+const users = {
+    "iter2025": {
+        name: "Suvra Kanta Patra",
+        college: "ITER",
+        branch: "CSE (Data Science)",
+        regNo: "25E116C25",
+        year: "1st Year",
+        phone: "9439687097",
+        results: { Calculus:7.5, Physics:7.5, ICP:7.5, ACT:7.5, UHV:6.5, CGPA:7.34 },
+        pdf: "kanta-1st-sem-result.pdf"
+    },
+    "smarak2025": {
+        name: "Smarak Satya Prakash Dash",
+        college: "ITER",
+        branch: "CSE",
+        regNo: "25E116C25",
+        year: "1st Year",
+        phone: "6371250093",
+        results: { Calculus:6.5, Physics:6.5, ICP:8.5, DM:7.5, UHV:7.5, CGPA:7.29 },
+        pdf: "1st-sem-result (1).pdf"
+    }
+};
+
+function login(){
+    let value = document.getElementById("password").value.trim();
+    if(users[value]){
+        document.getElementById("loginPage").style.display="none";
+        document.getElementById("dashboard").style.display="block";
+        loadDashboard(users[value]);
+    } else {
+        alert("Wrong Password ❌");
+    }
+}
+
+function loadDashboard(user){
+    document.getElementById("welcome").innerText = "Welcome " + user.name;
+
+    // Personal details
+    let personalDiv = document.getElementById("personal");
+    personalDiv.innerHTML = `
+        <h2>Personal Details</h2>
+        <p><b>Name:</b> ${user.name}</p>
+        <p><b>College:</b> ${user.college}</p>
+        <p><b>Branch:</b> ${user.branch}</p>
+        <p><b>Registration No:</b> ${user.regNo}</p>
+        <p><b>Year:</b> ${user.year}</p>
+        <p><b>Phone No:</b> ${user.phone}</p>
+    `;
+
+    // Results
+    let resultDiv = document.getElementById("result");
+    resultDiv.innerHTML = `<h2>Student Result</h2>`;
+    for(let subject in user.results){
+        resultDiv.innerHTML += `<p><b>${subject}:</b> ${user.results[subject]}</p>`;
+    }
+    resultDiv.innerHTML += `
+        <h3>📄 Result PDF</h3>
+        <iframe src="${user.pdf}" width="100%" height="400px" style="border-radius:10px;"></iframe>
+        <br><br>
+        <a href="${user.pdf}" download>
+            <button>Download PDF</button>
+        </a>
+    `;
+}
+
+function toggleMenu(){
+    document.getElementById("sidebar").classList.toggle("active");
+    document.getElementById("main").classList.toggle("shift");
+}
+
+function showSection(section){
+    document.getElementById("home").style.display="none";
+    document.getElementById("personal").style.display="none";
+    document.getElementById("result").style.display="none";
+    document.getElementById(section).style.display="block";
+}
+
+function logout(){
+    document.getElementById("dashboard").style.display="none";
+    document.getElementById("loginPage").style.display="flex";
+    document.getElementById("password").value="";
+}
+</script>
+
+</body>
+</html>
